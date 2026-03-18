@@ -1,0 +1,41 @@
+package com.example.ttsiku.controller;
+
+import com.example.ttsiku.dto.PostTaskDto;
+import com.example.ttsiku.dto.TaskDTO;
+import com.example.ttsiku.service.TaskService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/tasks")
+@RequiredArgsConstructor
+public class TaskController {
+
+    private final TaskService taskService;
+
+    // CREATE
+    @PostMapping
+    public TaskDTO create(@RequestBody PostTaskDto request) {
+        return taskService.create(request);
+    }
+
+    // GET ALL
+    @GetMapping
+    public List<TaskDTO> getAll() {
+        return taskService.getAll();
+    }
+
+    // GET BY USER
+    @GetMapping("/user/{userId}")
+    public List<TaskDTO> getByUser(@PathVariable Integer userId) {
+        return taskService.getByUser(userId);
+    }
+
+    // GET BY PROJECT
+    @GetMapping("/project/{projectId}")
+    public List<TaskDTO> getByProject(@PathVariable Integer projectId) {
+        return taskService.getByProject(projectId);
+    }
+}
