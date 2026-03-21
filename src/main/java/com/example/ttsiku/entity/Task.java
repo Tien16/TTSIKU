@@ -1,5 +1,6 @@
 package com.example.ttsiku.entity;
 
+import com.example.ttsiku.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,9 @@ public class Task {
 
     private String title;
     private String description;
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId")

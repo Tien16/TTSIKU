@@ -10,7 +10,7 @@ public class TaskMapper {
                 task.getTaskId(),
                 task.getTitle(),
                 task.getDescription(),
-                task.getStatus(),
+                task.getStatus() != null ? task.getStatus().name() : null,
                 task.getUser() != null ? task.getUser().getUserId() : null,
                 task.getUser() != null ? task.getUser().getUsername() : null,
                 task.getProject() != null ? task.getProject().getProjectId() : null,

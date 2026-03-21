@@ -1,6 +1,7 @@
 package com.example.ttsiku.controller;
 
 import com.example.ttsiku.dto.PostTaskDto;
+import com.example.ttsiku.dto.PutStatusDto;
 import com.example.ttsiku.dto.TaskDTO;
 import com.example.ttsiku.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +38,22 @@ public class TaskController {
     @GetMapping("/project/{projectId}")
     public List<TaskDTO> getByProject(@PathVariable Integer projectId) {
         return taskService.getByProject(projectId);
+    }
+
+    //API assign Task cho User
+    @PutMapping("/{taskId}/assign/{userId}")
+    public TaskDTO assignTask(
+            @PathVariable Integer taskId,
+            @PathVariable Integer userId) {
+
+        return taskService.assignTask(taskId, userId);
+    }
+
+    @PutMapping("/{taskId}/status")
+    public TaskDTO updateStatus(
+            @PathVariable Integer taskId,
+            @RequestBody PutStatusDto request) {
+
+        return taskService.putStatus(taskId, request.getStatus());
     }
 }
