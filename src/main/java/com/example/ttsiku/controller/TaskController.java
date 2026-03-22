@@ -4,6 +4,7 @@ import com.example.ttsiku.dto.PostTaskDto;
 import com.example.ttsiku.dto.PutStatusDto;
 import com.example.ttsiku.dto.TaskDTO;
 import com.example.ttsiku.service.TaskService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,11 +17,11 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    // CREATE
-    @PostMapping
-    public TaskDTO create(@RequestBody PostTaskDto request) {
-        return taskService.create(request);
-    }
+//    // CREATE
+//    @PostMapping
+//    public TaskDTO create(@RequestBody PostTaskDto request) {
+//        return taskService.create(request);
+//    }
 
     // GET ALL
     @GetMapping
@@ -30,19 +31,24 @@ public class TaskController {
 
     // GET BY USER
     @GetMapping("/user/{userId}")
-    public List<TaskDTO> getByUser(@PathVariable Integer userId) {
+    public List<TaskDTO> getByUser( @PathVariable Integer userId) {
         return taskService.getByUser(userId);
     }
 
     // GET BY PROJECT
     @GetMapping("/project/{projectId}")
-    public List<TaskDTO> getByProject(@PathVariable Integer projectId) {
+    public List<TaskDTO> getByProject( @PathVariable Integer projectId) {
         return taskService.getByProject(projectId);
+    }
+
+    @PostMapping
+    public PostTaskDto postTaskDto(@Valid @RequestBody PostTaskDto request) {
+        return taskService.postTaskDto(request);
     }
 
     //API assign Task cho User
     @PutMapping("/{taskId}/assign/{userId}")
-    public TaskDTO assignTask(
+    public TaskDTO assignTask(@Valid
             @PathVariable Integer taskId,
             @PathVariable Integer userId) {
 
@@ -50,7 +56,7 @@ public class TaskController {
     }
 
     @PutMapping("/{taskId}/status")
-    public TaskDTO updateStatus(
+    public TaskDTO updateStatus(@Valid
             @PathVariable Integer taskId,
             @RequestBody PutStatusDto request) {
 

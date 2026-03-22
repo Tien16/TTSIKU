@@ -6,6 +6,7 @@ import com.example.ttsiku.entity.Project;
 import com.example.ttsiku.entity.Task;
 import com.example.ttsiku.entity.User;
 import com.example.ttsiku.enums.TaskStatus;
+import com.example.ttsiku.exception.NotFoundException;
 import com.example.ttsiku.mapper.TaskMapper;
 import com.example.ttsiku.repository.ProjectRepository;
 import com.example.ttsiku.repository.ProjectUserRepository;
@@ -63,6 +64,50 @@ public class TaskService {
         task.setProject(project);
 
         return TaskMapper.toDTO(taskRepository.save(task));
+    }
+
+    public PostTaskDto postTaskDto(PostTaskDto request) {
+
+        Project project = projectRepository.findById(request.getProjectId())
+                .orElseThrow(() -> new NotFoundException("Project không tồn tại"));
+
+        User user = null;
+        if (request.getUserId() != null) {
+            user = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        }
+
+        Task task = new Task();
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setDeadline(request.getDeadline());
+
+        if (request.getStatus() == null) {
+            task.setStatus(TaskStatus.TODO);
+        } else {
+            try {
+                task.setStatus(TaskStatus.valueOf(request.getStatus()));
+            } catch (Exception e) {
+                throw new RuntimeException("Status không hợp lệ");
+            }
+        }
+
+        task.setUser(user);
+        task.setProject(project);
+
+        Task saved = taskRepository.save(task);
+
+        PostTaskDto response = new PostTaskDto();
+        response.setTitle(saved.getTitle());
+        response.setDescription(saved.getDescription());
+        response.setStatus(saved.getStatus().name());
+        response.setProjectId(saved.getProject().getProjectId());
+        response.setUserId(
+                saved.getUser() != null ? saved.getUser().getUserId() : null
+        );
+        response.setDeadline(saved.getDeadline());
+
+        return response;
     }
 
     public List<TaskDTO> getAll() {
