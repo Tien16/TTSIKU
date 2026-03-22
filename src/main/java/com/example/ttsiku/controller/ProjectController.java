@@ -2,8 +2,10 @@ package com.example.ttsiku.controller;
 
 import com.example.ttsiku.dto.PostProjectDto;
 import com.example.ttsiku.dto.ProjectDTO;
+import com.example.ttsiku.response.ApiResponse;
 import com.example.ttsiku.service.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,13 +17,14 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    // CREATE
+    // CREATE project - chỉ MANAGER
     @PostMapping
-    public ProjectDTO create(@RequestBody PostProjectDto request) {
-        return projectService.create(request);
+    @PreAuthorize("hasRole('MANAGER')")
+    public ApiResponse<?> createProject(@RequestBody PostProjectDto projectDTO) {
+        return ApiResponse.success(projectService.create(projectDTO));
     }
 
-    // GET ALL
+    // GET ALL projects
     @GetMapping
     public List<ProjectDTO> getAll() {
         return projectService.getAll();
@@ -33,8 +36,9 @@ public class ProjectController {
         return projectService.getById(id);
     }
 
-    // DELETE
+    // DELETE project
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public String delete(@PathVariable Integer id) {
         projectService.delete(id);
         return "Deleted successfully";

@@ -179,4 +179,15 @@ public class TaskService {
 
         return TaskMapper.toDTO(taskRepository.save(task));
     }
+
+    public List<TaskDTO> getMyTasks(String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return taskRepository.findByUserUserId(user.getUserId())
+                .stream()
+                .map(TaskMapper::toDTO)
+                .toList();
+    }
 }
