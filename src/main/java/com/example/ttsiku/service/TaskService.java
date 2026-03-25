@@ -136,12 +136,12 @@ public class TaskService {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
         if (task.getStatus().name().equals("DONE")) {
             throw new RuntimeException("Task đã DONE, không thể assign");
         }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         boolean isMember = projectUserRepository
                 .existsByProjectProjectIdAndUserUserId(
