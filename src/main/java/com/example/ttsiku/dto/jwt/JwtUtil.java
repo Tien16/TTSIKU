@@ -5,6 +5,7 @@ import com.example.ttsiku.entity.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -13,10 +14,14 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET = "secretkey123secretkey123secretkey123";
+    @Value("${jwt.secret-key}")
+    private String secret;
+
+    @Value("${jwt.time-life}")
+    private long timeLife;
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
+        return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public String generateToken(User user) {
@@ -24,7 +29,7 @@ public class JwtUtil {
                 .setSubject(user.getUsername())
                 .claim("roles", user.getRoles().stream().map(Role::getRoleName).toList())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
+                .setExpiration(new Date(System.currentTimeMillis() + timeLife))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

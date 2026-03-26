@@ -53,18 +53,20 @@ public class UserService {
     }
 
     public void register(RegisterDto request) {
-        if(userRepository.findByUsername(request.getUsername()).isPresent()){
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
             throw new RuntimeException("Username đã tồn tại");
         }
 
+        Role defaultRole = roleRepository.findByRoleName("USER")
+                .orElseThrow(() -> new RuntimeException("Role USER không tồn tại"));
+
         User user = new User();
         user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setStatus("ACTIVE");
+        user.setRoles(Set.of(defaultRole));
 
-        Role role = roleRepository.findByRoleName(request.getRole().toUpperCase())
-                .orElseThrow(() -> new RuntimeException("Role không tồn tại"));
-
-        user.setRoles(Set.of(role));
         userRepository.save(user);
     }
 }

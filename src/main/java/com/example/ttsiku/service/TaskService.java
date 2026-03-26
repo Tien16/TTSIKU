@@ -6,14 +6,17 @@ import com.example.ttsiku.entity.Project;
 import com.example.ttsiku.entity.Task;
 import com.example.ttsiku.entity.User;
 import com.example.ttsiku.enums.TaskStatus;
+import com.example.ttsiku.exception.AppException;
 import com.example.ttsiku.exception.NotFoundException;
 import com.example.ttsiku.mapper.TaskMapper;
 import com.example.ttsiku.repository.ProjectRepository;
 import com.example.ttsiku.repository.ProjectUserRepository;
 import com.example.ttsiku.repository.TaskRepository;
 import com.example.ttsiku.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -158,26 +161,59 @@ public class TaskService {
         return TaskMapper.toDTO(taskRepository.save(task));
     }
 
-    public TaskDTO putStatus(Integer taskId, String newStatus) {
+
+    @Transactional
+    public TaskDTO putStatus(Integer taskId, TaskStatus newStatus) {
 
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(() -> new AppException(
+                        HttpStatus.NOT_FOUND,
+                        "TASK_NOT_FOUND",
+                        "Task không tồn tại"
+                ));
 
-        if (task.getStatus().name().equals("DONE")) {
-            throw new RuntimeException("Task đã DONE, không thể update");
+        if (task.getStatus() == null) {
+            throw new AppException(
+                    HttpStatus.BAD_REQUEST,
+                    "TASK_STATUS_NULL",
+                    "Task chưa có status"
+            );
         }
 
-        String currentStatus = task.getStatus().name();
-
-        if (currentStatus.equals("TODO") && newStatus.equals("IN_PROGRESS")) {
-        } else if (currentStatus.equals("IN_PROGRESS") && newStatus.equals("DONE")) {
-        } else {
-            throw new RuntimeException("Sai flow status");
+        if (newStatus == null) {
+            throw new AppException(
+                    HttpStatus.BAD_REQUEST,
+                    "STATUS_REQUIRED",
+                    "Status không được để trống"
+            );
         }
 
-        task.setStatus(TaskStatus.valueOf(newStatus));
+        TaskStatus currentStatus = task.getStatus();
 
-        return TaskMapper.toDTO(taskRepository.save(task));
+        if (currentStatus == TaskStatus.DONE) {
+            throw new AppException(
+                    HttpStatus.BAD_REQUEST,
+                    "TASK_ALREADY_DONE",
+                    "Task đã DONE, không thể update"
+            );
+        }
+
+        boolean validFlow =
+                (currentStatus == TaskStatus.TODO && newStatus == TaskStatus.IN_PROGRESS) ||
+                        (currentStatus == TaskStatus.IN_PROGRESS && newStatus == TaskStatus.DONE);
+
+        if (!validFlow) {
+            throw new AppException(
+                    HttpStatus.BAD_REQUEST,
+                    "INVALID_STATUS_FLOW",
+                    "Sai flow status. Chỉ cho phép TODO -> IN_PROGRESS -> DONE"
+            );
+        }
+
+        task.setStatus(newStatus);
+        Task savedTask = taskRepository.save(task);
+
+        return TaskMapper.toDTO(savedTask);
     }
 
     public List<TaskDTO> getMyTasks(String username) {

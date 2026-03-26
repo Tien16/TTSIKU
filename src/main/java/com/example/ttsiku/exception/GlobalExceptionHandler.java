@@ -15,7 +15,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Validate DTO
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Object>> handleValidation(MethodArgumentNotValidException ex) {
 
@@ -31,21 +30,26 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error("VALIDATION_ERROR", message));
     }
 
-    // Custom Exception
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ApiResponse<Object>> handleAppException(AppException ex) {
-
         return ResponseEntity
                 .status(ex.getStatus())
                 .body(ApiResponse.error(ex.getCode(), ex.getMessage()));
     }
 
-    // Exception chung (500)
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<Object>> handleRuntimeException(RuntimeException ex) {
+        ex.printStackTrace();
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResponse.error("BAD_REQUEST", ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(Exception ex) {
-
+        ex.printStackTrace();
         return ResponseEntity
                 .internalServerError()
-                .body(ApiResponse.error("INTERNAL_ERROR", "Có lỗi xảy ra"));
+                .body(ApiResponse.error("INTERNAL_ERROR", ex.getMessage()));
     }
 }

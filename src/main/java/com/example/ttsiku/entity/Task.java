@@ -32,10 +32,10 @@ public class Task {
 
     @NotNull(message = "Status không được null")
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private TaskStatus status;
 
     @NotNull(message = "Deadline không được null")
-    @Future(message = "Deadline phải lớn hơn thời điểm hiện tại")
     private LocalDateTime deadline;
 
     @ManyToOne(fetch = FetchType.LAZY)
